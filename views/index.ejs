@@ -1,0 +1,270 @@
+<% layout('layout/base') %>
+    <br>
+    <section class="d-inline-flex flex-row justify-content-evenly">
+        <form action="/uploads" method="POST" class="d-flex" enctype="multipart/form-data">
+            <label class="me-3 w-50">Import the CSV File: </label>
+            <input type="file" class="form-control mx-3" name="material" accept=".csv">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </section>
+
+    <hr><br>
+
+    <section class="d-flex flex-row">
+        <label>Optional Search Field: </label>
+        <form method="GET" action="/search" class="d-flex">
+            <label class="form-label mx-3">Search:</label>
+            <input text="text" class="form-control mx-2" id="search2" name="search"
+                placeholder="Enter formula_pretty or symmetry__crystal_system" />
+            <button type="submit" class="btn btn-secondary">search</button>
+        </form>
+    </section>
+
+    <hr><br>
+
+    <section>
+
+        <form method="GET">
+            <div class="row mb-4">
+                <label class="col me-3">Sort Fields:</label>
+                <div class="col form-check form-check-inline">
+                    <input type="radio" class="form-check-input" name="sortby" id="nsites" value="nsites" />
+                    <label for="nsites" class="form-check-label">nsites</label>
+                </div>
+                <div class="col form-check form-check-inline">
+                    <input type="radio" class="form-check-input" id="density" name="sortby" value="density" />
+                    <label for="density" class="form-check-label">density</label>
+                </div>
+                <div class="col form-check form-check-inline">
+                    <input type="radio" class="form-check-input" name="sortby" id="volume" value="volume" />
+                    <label for="volume" class="form-check-label">volume</label>
+                </div>
+                <div class="col form-check form-check-inline">
+                    <input type="radio" class="form-check-input" name="sortby" id="symmetry__number"
+                        value="symmetry__number" />
+                    <label for="symmetry__number" class="form-check-label">symmetry__number</label>
+                </div>
+            </div>
+
+
+            <div class="row mb-4">
+                <label class="col me-3">Filterings Fields:</label>
+                <div data-mdb-input-init class="col form-group d-flex justify-content-start">
+                    <input type="text" class="form-control" id="search" name="search"
+                        title="search formula_pretty or symmetry__crystal_system"
+                        placeholder="Enter formula_pretty or symmetry__crystal_system" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col d-flex form-group me-3">
+                    <label class="form-label me-2" for="symmetry__number">symmetry__number:</label>
+                    <input class="form-control" placeholder="Equal to symmetry__number" type="number" name="symmetry_no"
+                        id="symmetry__number" />
+                </div>
+                <div class="col d-flex form-group me-3">
+                    <input class="form-control" type="number" name="minFormationEnergy" id="minFormationEnergy"
+                        step="any" placeholder="less than" />
+                    <label class="form-label me-2" for="formation_energy">Formation Energy:</label>
+                    <input class="form-control" type="number" name="maxFormationEnergy" id="maxFormationEnergy"
+                        step="any" placeholder="greater than" />
+                </div>
+            </div>
+
+            <div class="row mb-3 ">
+                <label class="col">Stable (Boolean):</label>
+                <div class="col form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="stable" id="true" value="true" />
+                    <label class="form-check-label" for="true">True</label>
+                </div>
+                <div class="col form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="stable" id="false" value="false" />
+                    <label class="form-check-label" for="false">False</label>
+                </div>
+            </div>
+
+            <button type="submit" class="mx- 5 btn btn-dark" onclick="OnSearch()">Search</button>
+        </form>
+    </section>
+
+    <hr><br>
+    <section class="d-flex justify-content-between">
+        <nav aria-label="Page navigation ">
+            <ul class="pagination">
+                <% if (currentPage> 1) {%>
+                    <li class="page-item">
+                        <a class="page-link text-primary btn-primary" href="/?page=<%= currentPage - 1 %>"
+                            aria-label="Previous">
+                            Previous
+                        </a>
+                    </li>
+                    <% } else { %>
+                        <button class="page-link" href="#" aria-label="Previous" disabled>
+                            Previous
+                        </button>
+                        <%} %>
+                            <a class="page-link" href="/?page=<%= currentPage %>">
+                                <%= currentPage %>
+                            </a>
+                            <% if (materials.length===size) { %>
+                                <li class="page-item">
+                                    <button class="page-link text-primary" href="/?page=<%= currentPage + 1 %>"
+                                        aria-label="Next">
+                                        Next
+                                    </button>
+                                </li>
+                                <% } else { %>
+                                    <a class="page-link" href="#" aria-label="Next" disabled>
+                                        Next
+                                    </a>
+                                    <%} %>
+            </ul>
+        </nav>
+        <div class="d-grid gap-2 mt-3 d-md-flex justify-content-end">
+            <a href="/export" class="btn btn-danger">Export File</a>
+        </div>
+    </section>
+
+    <hr><br>
+
+    <section>
+        <table class="table align-middle mb-0 bg-white">
+            <thead class="bg-light">
+                <th>nsites</th>
+                <th>formula_pretty</th>
+                <th>volume</th>
+                <th>density</th>
+                <th>symmetry__crystal_system</th>
+                <th>symmetry__symbol</th>
+                <th>symmetry__number</th>
+                <th>symmetry__point_group</th>
+                <th>symmetry__symprec</th>
+                <th>symmetry__version</th>
+                <th>formation_energy_per_atom</th>
+                <th>energy_above_hull</th>
+                <th>is_stable</th>
+                <th>band_gap</th>
+                <th>is_gap_direct</th>
+                <th>is_metal</th>
+                <th>ordering</th>
+                <th>total_magnetization</th>
+                <th>universal_anisotropy</th>
+                <th>theoretical</th>
+            </thead>
+            <% for (let material of materials) {%>
+                <tr>
+                    <td>
+                        <%= material.nsites %>
+                    </td>
+                    <td>
+                        <%= material.formula_pretty %>
+                    </td>
+                    <td>
+                        <%= material.volume %>
+                    </td>
+                    <td>
+                        <%= material.density %>
+                    </td>
+                    <td>
+                        <%= material.symmetry__crystal_system %>
+                    </td>
+                    <td>
+                        <%= material.symmetry__symbol %>
+                    </td>
+                    <td>
+                        <%= material.symmetry__number %>
+                    </td>
+                    <td>
+                        <%= material.symmetry__point_group %>
+                    </td>
+                    <td>
+                        <%= material.symmetry__symprec %>
+                    </td>
+                    <td>
+                        <%= material.symmetry__version %>
+                    </td>
+                    <td>
+                        <%= material.formation_energy_per_atom %>
+                    </td>
+                    <td>
+                        <%= material.energy_above_hull %>
+                    </td>
+                    <td>
+                        <%= material.is_stable %>
+                    </td>
+                    <td>
+                        <%= material.band_gap %>
+                    </td>
+                    <td>
+                        <%= material.is_gap_direct %>
+                    </td>
+                    <td>
+                        <%= material.is_metal %>
+                    </td>
+                    <td>
+                        <%= material.ordering %>
+                    </td>
+                    <td>
+                        <%= material.total_magnetization %>
+                    </td>
+                    <td>
+                        <%= material.universal_anisotropy %>
+                    </td>
+                    <td>
+                        <%= material.theoretical %>
+                    </td>
+                </tr>
+                <% } %>
+
+        </table>
+    </section>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const storedSearchParams = JSON.parse(localStorage.getItem('searchParams'));
+
+            if (storedSearchParams) {
+                document.getElementById('search').value = storedSearchParams.search || '';
+                document.getElementById('symmetry__number').value = storedSearchParams.symmetry_no || '';
+                document.querySelector('input[name="minFormationEnergy"]').value = storedSearchParams.minEnergy || '';
+                document.querySelector('input[name="maxFormationEnergy"]').value = storedSearchParams.maxEnergy || '';
+                const sortValue = storedSearchParams.sort_value;
+                const sortRadioButton = document.querySelector(`input[name="sortby"][value="${sortValue}"]`);
+                if (sortRadioButton) {
+                    sortRadioButton.checked = true;
+                }
+                // if (storedSearchParams.stable === 'true') {
+                //     document.getElementById('true').checked = true;
+                // } else if (storedSearchParams.stable === 'false') {
+                //     document.getElementById('false').checked = true;
+                // }
+            }
+        });
+        async function OnSearch() {
+            const search_param = document.getElementById('search').value;
+            const symmetry__number = document.getElementById('symmetry__number').value;
+            const stable = document.querySelector('input[name="stable"]:checked') ? document.querySelector('input[name="stable"]:checked').value : '';
+            const minEnergy = document.querySelector('input[name="minFormationEnergy"]').value;
+            const maxEnergy = document.querySelector('input[name="maxFormationEnergy"]').value;
+            const selectedSortRadioButton = document.querySelector('input[name="sortby"]:checked');
+            const sort_value = selectedSortRadioButton ? selectedSortRadioButton.value : '';
+
+            const searchParams = {
+                search: search_param,
+                symmetry_no: symmetry__number,
+                stable: stable,
+                minEnergy: minEnergy,
+                maxEnergy: maxEnergy,
+                sort_value: sort_value
+            };
+
+            // Convert the object to a JSON string before storing in local storage
+            localStorage.setItem('searchParams', JSON.stringify(searchParams));
+
+            // Retrieve and log the stored parameters from local storage
+            const storedSearchParams = JSON.parse(localStorage.getItem('searchParams'));
+            console.log(storedSearchParams);
+        }
+
+    </script>

@@ -1,3 +1,4 @@
+require('./config/config');
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -5,8 +6,7 @@ const cors = require('cors');
 const ejs = require('ejs-mate');
 const bodyParser = require('body-parser');
 
-
-const MaterialRoutes = require('./routes/material');
+const MaterialRoutes = require('./routes/routes');
 
 
 // Database connection

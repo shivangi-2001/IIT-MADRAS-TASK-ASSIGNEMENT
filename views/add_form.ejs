@@ -1,0 +1,89 @@
+<% layout('layout/base') %>
+<h1>New Material Form</h1>
+<p>* all fields are required</p>
+    <form method="POST">
+        <div>
+            <label for="nsites">nsites:</label>
+            <input type="number" name="nsites" id="nsites" required>
+        </div>
+        <div>
+            <label for="formula_pretty">Formula pretty:</label>
+            <input type="text" name="formula_pretty" id="formula_pretty" required>
+        </div>
+        <div>
+            <label for="volume">Volume:</label>
+            <input type="number" step="any"  name="volume" id="volume" required>
+        </div>
+        <div>
+            <label for="density">Density:</label>
+            <input type="number" step="any"  name="density" id="density" required>
+        </div>
+        <div>
+            <label for="symmetry__crystal_system">symmetry__crystal_system:</label>
+            <input type="text" name="symmetry__crystal_system" id="symmetry__crystal_system" required>
+        </div>
+        <div>
+            <label for="symmetry__symbol">symmetry__symbol:</label>
+            <input type="text"  name="symmetry__symbol" id="symmetry__symbol" required>
+        </div>
+        <div>
+            <label for="symmetry__number">symmetry__number:</label>
+            <input type="number" name="symmetry__number" id="symmetry__number" required>
+        </div>
+        <div>
+            <label for="symmetry__point_group">symmetry__point_group:</label>
+            <input type="text" name="symmetry__point_group"  id="symmetry__point_group" required>
+        </div>
+        <div>
+            <label for="symmetry__symprec">symmetry__symprec:</label>
+            <input type="number" step="any"  name="symmetry__symprec" id="symmetry__symprec" required>
+        </div>
+        <div>
+            <label for="symmetry__version">symmetry__version:</label>
+            <input type="text" name="symmetry__version" pattern="\d+\.\d+\.\d+" id="symmetry__version" required>
+        </div>
+        <div>
+            <label for="formation_energy_per_atom">formation_energy_per_atom:</label>
+            <input type="number" name="formation_energy_per_atom" step="any" id="formation_energy_per_atom" required>
+        </div>
+        <div>
+            <label for="energy_above_hull">energy_above_hull:</label>
+            <input type="number" name="energy_above_hull" step="any" id="energy_above_hull" required>
+        </div>
+        <div>
+            <label for="is_stable">is_stable:</label>
+            <input type="text" name="is_stable" id="is_stable" pattern="true|false" title="Please enter 'true' or 'false'"/>
+        </div>
+        <div>
+            <label for="band_gap">band_gap:</label>
+            <input type="number" name="band_gap" id="band_gap"  required/>
+        </div>
+        <div>
+            <label for="is_gap_direct">is_gap_direct:</label>
+            <input type="text" pattern="true|false" title="Please enter 'true' or 'false'"name="is_gap_direct" id="is_gap_direct"  />
+        </div>
+        <div>
+            <label for="is_metal">is_metal:</label>
+            <input type="text" pattern="true|false" title="Please enter 'true' or 'false'"name="is_metal" id="is_metal"  />
+        </div>
+        <div>
+            <label for="ordering">ordering:</label>
+            <input type="text" pattern="true|false" title="Please enter 'true' or 'false'"name="ordering" id="ordering"  />
+        </div>
+        <div>
+            <label for="total_magnetization">total_magnetization:</label>
+            <input type="number" step="any"  name="total_magnetization" id="total_magnetization" required/>
+        </div>
+        <div>
+            <label for="universal_anisotropy">universal_anisotropy:</label>
+            <input type="number" step="any"  name="universal_anisotropy" id="universal_anisotropy" required/>
+        </div>
+        <div>
+            <label for="theoretical">theoretical:</label>
+            <input type="text" pattern="true|false" title="Please enter 'true' or 'false'"name="theoretical" id="theoretical" />
+        </div>
+
+
+
+        <button type="submit">Submit</button>
+    </form>

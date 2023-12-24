@@ -6,58 +6,6 @@ const export_csv = require('fast-csv');
 const ValidateInput = require('../middlware/validate_input');
 const { STATUS_CODES } = require('http');
 
-
-module.exports.filtersResult = async (req, res) => {
-    try {
-        const { formula, shape, sortby, stable, symmetry, minEnergy, maxEnergy, symbol } = req.query;
-
-        const filter = {}
-        if (formula) filter.formula_pretty = { $regex: new RegExp(`.*${formula}.*`, 'i') };
-        if (shape) filter.symmetry__crystal_system = { $regex: new RegExp(shape, 'i') }
-        if (symbol) filter.symmetry__symbol = { $regex: new RegExp(symbol, 'i') };
-        if (symmetry) filter.symmetry__number = { $eq: symmetry }
-        if (stable) filter.is_stable = stable === 'true'
-
-        if (minEnergy && maxEnergy) {
-            filter.energy_above_hull = { $gt: parseFloat(minEnergy), $lt: parseFloat(minEnergy) }
-        } else if (minEnergy) {
-            filter.energy_above_hull = { $gt: parseFloat(minEnergy) }
-        } else if (maxEnergy) {
-            filter.energy_above_hull = { $lt: parseFloat(maxEnergy) }
-        }
-        console.log(filter)
-        const sort = {}
-        if (sortby) {
-            sort_array = sortby.split(',')
-            if (sort_array.length > 0) {
-                sort_array.forEach(value => {
-                    sort[value] = 1
-                })
-            } else {
-                sort[nsites] = 1;
-            }
-        }
-        else sort.nsites = 1;
-
-        console.log(sort)
-
-        const materials = await Materials.find(filter).sort(sort)
-        const totalResponse = await Materials.countDocuments(filter).sort(sort)
-
-        const response = {
-            statusCode: STATUS_CODES[200],
-            message: "Successfully",
-            total_Output: totalResponse,
-            material: materials
-        }
-        res.status(200).json(response)
-        // res.render('import.ejs', { materials: materials })
-    } catch (error) {
-        res.status(500).send(`Internal Server Error ${error}`)
-        console.error(`Internal Server Error ${error}`)
-    }
-}
-
 module.exports.materials_list = async (req, res) => {
     try {
         // Rendering the all the materials list present in Database
@@ -68,7 +16,79 @@ module.exports.materials_list = async (req, res) => {
             material: materials
         }
         res.status(200).json(response_body)
-        // res.render('import.ejs', { materials: materials })
+        res.render('index.ejs', { materials: materials })
+    } catch (error) {
+        res.status(500).send(`Internal Server Error ${error}`)
+        console.error(`Internal Server Error ${error}`)
+    }
+}
+
+module.exports.filtersResult = async (req, res) => {
+    try {
+        const { search, sortby, stable, symmetry_no, minFormationEnergy, maxFormationEnergy } = req.query;
+
+        const filter = {}
+        if (search) {
+            filter.$or = [
+                { 'formula_pretty': { $regex: new RegExp(`.*${search}.*`, 'i') } },
+                { 'symmetry__crystal_system': { $regex: new RegExp(`.*${search}.*`, 'i') } }
+            ]
+        }
+
+        if (symmetry_no) filter.symmetry__number = { $eq: symmetry_no }
+        if (stable) filter.is_stable = stable
+
+        if (minFormationEnergy && maxFormationEnergy) {
+            filter.energy_above_hull = { $gt: parseFloat(minFormationEnergy), $lt: parseFloat(maxFormationEnergy) }
+        } else if (minFormationEnergy) {
+            filter.energy_above_hull = { $gt: parseFloat(minFormationEnergy) }
+        } else if (maxFormationEnergy) {
+            filter.energy_above_hull = { $lt: parseFloat(maxFormationEnergy) }
+        }
+        const sort = {}
+        if (sortby) sort[sortby] = 1
+
+        const materials = await Materials.find(filter).sort(sort)
+        const totalResponse = await Materials.countDocuments(filter).sort(sort)
+
+        const newLocal = "Successfully Found Result ...";
+        const response = {
+            statusCode: STATUS_CODES[200],
+            message: newLocal,
+            total_Output: totalResponse,
+            material: materials
+        }
+        // res.status(200).json(response)
+        // pagination 
+        const page = parseInt(req.query.page) || 1;
+        const size = 30; // Set the number of materials to display per page
+        const startIndex = (page - 1) * size;
+        const endIndex = startIndex + size;
+        const materialsOnPage = materials.slice(startIndex, endIndex);
+        res.render('index.ejs', { materials: materialsOnPage, currentPage: page, size: 30 })
+    } catch (error) {
+        res.status(500).send(`Internal Server Error ${error}`)
+        console.error(`Internal Server Error ${error}`)
+    }
+}
+
+module.exports.searchResult = async (req, res) => {
+    try {
+        let final_serach_result = [];
+        const search = req.query.search;
+        final_serach_result = await Materials.find({
+            '$or': [
+                { 'formula_pretty': { $regex: new RegExp(`.*${search}.*`, 'i') } },
+                { 'symmetry__crystal_system': { $regex: new RegExp(`.*${search}.*`, 'i') } }
+            ]
+        })
+        res.status(200).json({'status':true, 'message': 'succesfully found result', 'data':final_serach_result})
+        const page = parseInt(req.query.page) || 1;
+        const size = 30; // Set the number of materials to display per page
+        const startIndex = (page - 1) * size;
+        const endIndex = startIndex + size;
+        const materialsOnPage = final_serach_result.slice(startIndex, endIndex);
+        // res.render('index.ejs', { materials: final_serach_result, currentPage: page, size: 30 })
     } catch (error) {
         res.status(500).send(`Internal Server Error ${error}`)
         console.error(`Internal Server Error ${error}`)
@@ -115,6 +135,7 @@ module.exports.upload_csv_to_db = async (req, res) => {
 
 module.exports.add_new_material = async (req, res) => {
     try {
+        console.log(req.body)
         const validate_new_data = ValidateInput.validate(req.body)
         if (validate_new_data.error) {
             return res.status(400).send(`validation Error at new Material ${validate_new_data.error}`)
@@ -124,7 +145,7 @@ module.exports.add_new_material = async (req, res) => {
         })
         await new_material.save()
         res.status(201).json({ statusCode: STATUS_CODES[201], message: "New Materials is added succesffully!" })
-
+        // res.redirect('/');
     } catch (error) {
         console.error('Error exporting CSV:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -167,7 +188,7 @@ module.exports.export_csv_file = async (req, res) => {
             .pipe(file)
             .on('finish', () => {
                 console.log('export_data.csv written successfully');
-                return res.status(200).send({ statusCode:STATUS_CODES[200], successful: 'Completed',message: 'successfully exported' });
+                return res.status(200).send({ statusCode: STATUS_CODES[200], successful: 'Completed', message: 'successfully exported' });
             });
 
     } catch (error) {
