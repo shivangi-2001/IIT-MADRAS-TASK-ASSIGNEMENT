@@ -15,7 +15,7 @@ module.exports.materials_list = async (req, res) => {
             message: "Successfully, rendering",
             material: materials
         }
-        res.status(200).json(response_body)
+        // res.status(200).json(response_body)
         res.render('index.ejs', { materials: materials })
     } catch (error) {
         res.status(500).send(`Internal Server Error ${error}`)
@@ -58,14 +58,14 @@ module.exports.filtersResult = async (req, res) => {
             total_Output: totalResponse,
             material: materials
         }
-        // res.status(200).json(response)
+        res.status(200).json(response)
         // pagination 
         const page = parseInt(req.query.page) || 1;
         const size = 30; // Set the number of materials to display per page
         const startIndex = (page - 1) * size;
         const endIndex = startIndex + size;
         const materialsOnPage = materials.slice(startIndex, endIndex);
-        res.render('index.ejs', { materials: materialsOnPage, currentPage: page, size: 30 })
+        // res.render('index.ejs', { materials: materialsOnPage, currentPage: page, size: 30 , searchResult: totalResponse})
     } catch (error) {
         res.status(500).send(`Internal Server Error ${error}`)
         console.error(`Internal Server Error ${error}`)

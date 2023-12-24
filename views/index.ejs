@@ -120,6 +120,11 @@
                                     <%} %>
             </ul>
         </nav>
+        <% if (searchResult ){%>
+        <div class="d-grid gap-2 mt-3 d-md-flex justify-content-end">
+            <h5>search result: <%= searchResult %></h5>
+        </div>
+        <% }%>
         <div class="d-grid gap-2 mt-3 d-md-flex justify-content-end">
             <a href="/export" class="btn btn-danger">Export File</a>
         </div>
@@ -226,7 +231,7 @@
 
             if (storedSearchParams) {
                 document.getElementById('search').value = storedSearchParams.search || '';
-                document.getElementById('symmetry__number').value = storedSearchParams.symmetry_no || '';
+                document.querySelector('input[name="symmetry_no"]').value = storedSearchParams.symmetry_no || '';
                 document.querySelector('input[name="minFormationEnergy"]').value = storedSearchParams.minEnergy || '';
                 document.querySelector('input[name="maxFormationEnergy"]').value = storedSearchParams.maxEnergy || '';
                 const sortValue = storedSearchParams.sort_value;
@@ -234,16 +239,16 @@
                 if (sortRadioButton) {
                     sortRadioButton.checked = true;
                 }
-                // if (storedSearchParams.stable === 'true') {
-                //     document.getElementById('true').checked = true;
-                // } else if (storedSearchParams.stable === 'false') {
-                //     document.getElementById('false').checked = true;
-                // }
+                if (storedSearchParams.stable === 'true') {
+                    document.getElementById('true').checked = true;
+                } else if (storedSearchParams.stable === 'false') {
+                    document.getElementById('false').checked = true;
+                }
             }
         });
         async function OnSearch() {
             const search_param = document.getElementById('search').value;
-            const symmetry__number = document.getElementById('symmetry__number').value;
+            const symmetry__number =  document.querySelector('input[name="symmetry_no"]').value;
             const stable = document.querySelector('input[name="stable"]:checked') ? document.querySelector('input[name="stable"]:checked').value : '';
             const minEnergy = document.querySelector('input[name="minFormationEnergy"]').value;
             const maxEnergy = document.querySelector('input[name="maxFormationEnergy"]').value;
