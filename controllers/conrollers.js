@@ -16,7 +16,26 @@ module.exports.materials_list = async (req, res) => {
             material: materials
         }
         // res.status(200).json(response_body)
-        res.render('index.ejs', { materials: materials })
+        const { search, sortby, stable, symmetry_no, minFormationEnergy, maxFormationEnergy } = req.query;
+
+        const filter = {}
+        if (search) {
+            filter.$or = [
+                { 'formula_pretty': { $regex: new RegExp(`.*${search}.*`, 'i') } },
+                { 'symmetry__crystal_system': { $regex: new RegExp(`.*${search}.*`, 'i') } }
+            ]
+        }
+        const sort = {}
+        if (sortby) sort[sortby] = 1
+        const totalResponse = await Materials.countDocuments(filter).sort(sort)
+
+        const page = parseInt(req.query.page) || 1;
+        const size = 30; // Set the number of materials to display per page
+        const startIndex = (page - 1) * size;
+        const endIndex = startIndex + size;
+        const materialsOnPage = materials.slice(startIndex, endIndex);
+        res.render('index.ejs', { materials: materialsOnPage, currentPage: page, size: 30 , searchResult: totalResponse})
+   
     } catch (error) {
         res.status(500).send(`Internal Server Error ${error}`)
         console.error(`Internal Server Error ${error}`)
@@ -58,14 +77,14 @@ module.exports.filtersResult = async (req, res) => {
             total_Output: totalResponse,
             material: materials
         }
-        res.status(200).json(response)
+        // res.status(200).json(response)
         // pagination 
         const page = parseInt(req.query.page) || 1;
         const size = 30; // Set the number of materials to display per page
         const startIndex = (page - 1) * size;
         const endIndex = startIndex + size;
         const materialsOnPage = materials.slice(startIndex, endIndex);
-        // res.render('index.ejs', { materials: materialsOnPage, currentPage: page, size: 30 , searchResult: totalResponse})
+        res.render('index.ejs', { materials: materialsOnPage, currentPage: page, size: 30 , searchResult: totalResponse})
     } catch (error) {
         res.status(500).send(`Internal Server Error ${error}`)
         console.error(`Internal Server Error ${error}`)
@@ -82,13 +101,16 @@ module.exports.searchResult = async (req, res) => {
                 { 'symmetry__crystal_system': { $regex: new RegExp(`.*${search}.*`, 'i') } }
             ]
         })
-        res.status(200).json({'status':true, 'message': 'succesfully found result', 'data':final_serach_result})
+        // res.status(200).json({'status':true, 'message': 'succesfully found result', 'data':final_serach_result})
         const page = parseInt(req.query.page) || 1;
         const size = 30; // Set the number of materials to display per page
         const startIndex = (page - 1) * size;
         const endIndex = startIndex + size;
         const materialsOnPage = final_serach_result.slice(startIndex, endIndex);
-        // res.render('index.ejs', { materials: final_serach_result, currentPage: page, size: 30 })
+        // const totalResponse = await materialsOnPage.countDocuments().sort(sort)
+        // res.render('index.ejs', { materials: materialsOnPage, currentPage: page, size: 30 , searchResult: totalResponse})
+
+        res.render('index.ejs', { materials: materialsOnPage, currentPage: page, size: 30 })
     } catch (error) {
         res.status(500).send(`Internal Server Error ${error}`)
         console.error(`Internal Server Error ${error}`)
@@ -125,8 +147,8 @@ module.exports.upload_csv_to_db = async (req, res) => {
             }
         }
         await Materials.insertMany(jsonObjects)
-        res.status(201).json({ statusCode: STATUS_CODES[201], message: "Successufully add to database" })
-        // res.redirect('/');
+        // res.status(201).json({ statusCode: STATUS_CODES[201], message: "Successufully add to database" })
+        res.redirect('/');
     } catch (error) {
         console.error('Error exporting CSV:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -144,8 +166,8 @@ module.exports.add_new_material = async (req, res) => {
             ...req.body
         })
         await new_material.save()
-        res.status(201).json({ statusCode: STATUS_CODES[201], message: "New Materials is added succesffully!" })
-        // res.redirect('/');
+        // res.status(201).json({ statusCode: STATUS_CODES[201], message: "New Materials is added succesffully!" })
+        res.redirect('/');
     } catch (error) {
         console.error('Error exporting CSV:', error);
         res.status(500).json({ error: 'Internal Server Error' });

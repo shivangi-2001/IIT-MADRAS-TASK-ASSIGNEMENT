@@ -4,7 +4,6 @@ const multer = require('multer');
 
 const upload = multer({ dest: 'uploads/' });
 const Controlllers = require('../controllers/conrollers');
-const Materials = require('../models/models');
 
 routes.get('/', Controlllers.filtersResult)
 

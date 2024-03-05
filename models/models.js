@@ -71,10 +71,11 @@ const materialSchema = new mongoose.Schema({
     },
     total_magnetization: {
         type: Number,
+        null: true
     },
     universal_anisotropy: {
         type: Number,
-        require: true
+        null: true
     },
     theoretical: {
         type: Boolean,
